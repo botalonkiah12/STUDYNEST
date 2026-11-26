@@ -1,0 +1,1592 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>StudyNest – Student Task Manager</title>
+
+  <!-- Google Fonts: Inter for crisp, student-friendly typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            lavender: {
+              50: '#FAF8FF',
+              100: '#F5F3FF',
+              200: '#EDE9FE',
+              300: '#DDD6FE',
+              400: '#C4B5FD',
+            },
+            royal: {
+              600: '#6D28D9',
+              700: '#5B21B6',
+              800: '#4C1D95',
+              900: '#3B0764',
+            }
+          },
+          boxShadow: {
+            'soft': '0 10px 25px -5px rgba(76, 29, 149, 0.06), 0 4px 10px -3px rgba(76, 29, 149, 0.04)',
+            'card-hover': '0 16px 32px -8px rgba(76, 29, 149, 0.12), 0 6px 14px -4px rgba(76, 29, 149, 0.06)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom scrollbar & subtle transitions for polished SPA feel */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F5F3FF;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C4B5FD;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #7C3AED;
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-card {
+      animation: fadeSlideUp 0.28s ease-out forwards;
+    }
+
+    /* Prevent iOS/Android tap highlight flash on interactive controls */
+    button, a, input, select {
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-lavender-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row selection:bg-lavender-300 selection:text-royal-900 pb-20 lg:pb-0">
+
+  <!-- ===================================================================== -->
+  <!-- DESKTOP SIDEBAR NAVIGATION                                            -->
+  <!-- ===================================================================== -->
+  <aside class="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 bg-white border-r border-lavender-200 px-6 py-8 z-30">
+    <!-- Brand Logo -->
+    <div class="flex items-center gap-3.5 mb-10">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-royal-700 to-royal-900 flex items-center justify-center text-white shadow-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-extrabold tracking-tight text-royal-900">StudyNest</h1>
+        <p class="text-xs font-medium text-royal-700/70">Student Task Manager</p>
+      </div>
+    </div>
+
+    <!-- Primary Add Task CTA -->
+    <button id="desktopAddBtn" type="button" class="w-full mb-7 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-royal-800 to-royal-700 hover:from-royal-900 hover:to-royal-800 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98]">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      <span>New Academic Task</span>
+    </button>
+
+    <!-- SPA Route Links -->
+    <nav class="space-y-2 flex-1" aria-label="Main Navigation">
+      <button type="button" data-route="dashboard" class="nav-link w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200">
+        <span class="flex items-center gap-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+          </svg>
+          <span>Dashboard</span>
+        </span>
+        <span id="navBadgeAll" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-lavender-200 text-royal-800">0</span>
+      </button>
+
+      <button type="button" data-route="pending" class="nav-link w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200">
+        <span class="flex items-center gap-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Pending Tasks</span>
+        </span>
+        <span id="navBadgePending" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800">0</span>
+      </button>
+
+      <button type="button" data-route="completed" class="nav-link w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200">
+        <span class="flex items-center gap-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Completed Tasks</span>
+        </span>
+        <span id="navBadgeCompleted" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">0</span>
+      </button>
+    </nav>
+
+    <!-- OOP Architecture Info Card & Sample Data Reset -->
+    <div class="mt-auto pt-6 border-t border-lavender-200 space-y-3">
+      <div class="p-4 rounded-2xl bg-lavender-100 border border-lavender-200">
+        <p class="text-xs font-bold text-royal-900 uppercase tracking-wider mb-1">OOP Architecture</p>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Powered by <span class="font-semibold text-royal-800">Encapsulation</span>, <span class="font-semibold text-royal-800">Inheritance</span>, <span class="font-semibold text-royal-800">Polymorphism</span> &amp; <span class="font-semibold text-royal-800">Abstraction</span>.
+        </p>
+      </div>
+      <button id="resetSamplesBtnDesktop" type="button" class="w-full py-2.5 px-3 rounded-xl text-xs font-semibold text-royal-700 hover:bg-lavender-100 border border-lavender-200 transition-colors flex items-center justify-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        <span>Restore Sample Tasks</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================================================================== -->
+  <!-- MOBILE TOP HEADER                                                     -->
+  <!-- ===================================================================== -->
+  <header class="lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-lavender-200 px-4 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-royal-700 to-royal-900 flex items-center justify-center text-white shadow-sm">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold text-royal-900 leading-tight">StudyNest</h1>
+        <p class="text-[11px] font-medium text-royal-700/75">Student Task Manager</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="resetSamplesBtnMobile" type="button" title="Restore Sample Tasks" class="p-2.5 rounded-xl bg-lavender-100 text-royal-800 hover:bg-lavender-200 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+      </button>
+      <button id="mobileHeaderAddBtn" type="button" class="px-3.5 py-2 rounded-xl bg-royal-800 hover:bg-royal-900 text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 active:scale-95 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>Add</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN CONTENT WORKSPACE                                                -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 lg:pl-72 w-full">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-6 sm:space-y-8">
+
+      <!-- Welcome Banner & Current Date -->
+      <section class="bg-gradient-to-r from-royal-900 via-royal-800 to-royal-700 rounded-2xl p-6 sm:p-8 text-white shadow-soft relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
+        <div class="absolute right-12 -bottom-12 w-32 h-32 rounded-full bg-lavender-300/15 blur-lg pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <span id="currentDateBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-lavender-100 text-xs font-medium mb-3">
+              📅 Loading date...
+            </span>
+            <h2 id="welcomeHeading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Welcome back, Scholar!
+            </h2>
+            <p id="welcomeSubtitle" class="text-lavender-200 text-sm sm:text-base mt-1.5 max-w-xl">
+              Organize your coursework, track upcoming deadlines, and stay ahead of every semester milestone.
+            </p>
+          </div>
+          <div class="shrink-0">
+            <button id="bannerAddBtn" type="button" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white text-royal-900 hover:bg-lavender-100 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-95">
+              <svg class="w-5 h-5 text-royal-700" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span>Create Task</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- DASHBOARD METRICS & PROGRESS BAR (Visible primarily on Dashboard)   -->
+      <!-- =================================================================== -->
+      <section id="dashboardMetricsSection" class="space-y-5">
+        <!-- 3 Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Total Tasks -->
+          <div class="bg-white rounded-2xl p-5 border border-lavender-200 shadow-soft flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Tasks</p>
+              <p id="statTotal" class="text-3xl font-extrabold text-royal-900 mt-1">0</p>
+              <p class="text-xs text-slate-500 mt-1">All recorded activities</p>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-lavender-200 text-royal-800 flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Pending Tasks -->
+          <div class="bg-white rounded-2xl p-5 border border-lavender-200 shadow-soft flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Pending Tasks</p>
+              <p id="statPending" class="text-3xl font-extrabold text-amber-600 mt-1">0</p>
+              <p class="text-xs text-slate-500 mt-1">Awaiting completion</p>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Completed Tasks -->
+          <div class="bg-white rounded-2xl p-5 border border-lavender-200 shadow-soft flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Completed</p>
+              <p id="statCompleted" class="text-3xl font-extrabold text-emerald-600 mt-1">0</p>
+              <p class="text-xs text-slate-500 mt-1">Finished assignments</p>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Study Progress Card -->
+        <div class="bg-white rounded-2xl p-5 sm:p-6 border border-lavender-200 shadow-soft">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-royal-900">Academic Completion Progress</h3>
+              <p id="progressCaption" class="text-xs text-slate-500 mt-0.5">0 of 0 tasks completed</p>
+            </div>
+            <span id="progressPercentage" class="text-lg sm:text-xl font-extrabold text-royal-800 bg-lavender-100 px-3.5 py-1 rounded-xl border border-lavender-200">
+              0%
+            </span>
+          </div>
+          <div class="w-full h-3.5 bg-lavender-100 rounded-full overflow-hidden p-0.5 border border-lavender-200">
+            <div id="progressBarFill" class="h-full rounded-full bg-gradient-to-r from-royal-600 via-royal-700 to-royal-900 transition-all duration-500 ease-out" style="width: 0%"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SEARCH BAR, VIEW HEADER & PRIORITY FILTER PILLS                     -->
+      <!-- =================================================================== -->
+      <section class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 id="viewTitle" class="text-xl font-extrabold text-royal-900">Dashboard Overview</h3>
+            <p id="viewSubtitle" class="text-xs sm:text-sm text-slate-500">Showing all your academic tasks sorted by urgency</p>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative w-full sm:w-72">
+            <svg class="w-4 h-4 text-royal-700/60 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Search title or subject..."
+              aria-label="Search tasks by title or subject"
+              class="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-white border border-lavender-300 focus:border-royal-700 focus:ring-2 focus:ring-royal-700/20 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all shadow-sm"
+            />
+            <button id="clearSearchBtn" type="button" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-royal-800" title="Clear search">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Priority Filter Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar" role="group" aria-label="Filter by Priority">
+          <span class="text-xs font-semibold text-slate-500 mr-1 shrink-0">Priority:</span>
+          <button type="button" data-priority-filter="all" class="priority-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0">
+            All Priorities
+          </button>
+          <button type="button" data-priority-filter="High" class="priority-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0">
+            🔴 High
+          </button>
+          <button type="button" data-priority-filter="Medium" class="priority-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0">
+            🟡 Medium
+          </button>
+          <button type="button" data-priority-filter="Low" class="priority-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0">
+            🟢 Low
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TASK CARDS CONTAINER                                                -->
+      <!-- =================================================================== -->
+      <section aria-live="polite">
+        <div id="taskListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Task cards dynamically rendered via StudyNestUI -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyStateContainer" class="hidden bg-white rounded-2xl border border-lavender-200 p-8 sm:p-12 text-center shadow-soft">
+          <div class="w-16 h-16 rounded-2xl bg-lavender-100 text-royal-700 mx-auto flex items-center justify-center mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+          </div>
+          <h4 id="emptyStateTitle" class="text-lg font-bold text-royal-900">No tasks found</h4>
+          <p id="emptyStateMessage" class="text-sm text-slate-500 mt-1 max-w-md mx-auto">
+            You don't have any tasks matching this view yet. Add a new assignment or project to get started!
+          </p>
+          <button id="emptyAddBtn" type="button" class="mt-5 px-5 py-2.5 rounded-xl bg-royal-800 hover:bg-royal-900 text-white text-sm font-semibold shadow-sm transition-all inline-flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Add Your First Task</span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MOBILE BOTTOM NAVIGATION BAR (Android & iOS Friendly)                 -->
+  <!-- ===================================================================== -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-lavender-200 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_20px_rgba(76,29,149,0.06)]" aria-label="Mobile Navigation">
+    <button type="button" data-route="dashboard" class="mobile-nav-link flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-xs font-semibold transition-colors">
+      <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+      </svg>
+      <span>Dashboard</span>
+    </button>
+
+    <button type="button" data-route="pending" class="mobile-nav-link flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-xs font-semibold transition-colors relative">
+      <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Pending</span>
+    </button>
+
+    <button type="button" data-route="completed" class="mobile-nav-link flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-xs font-semibold transition-colors">
+      <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Completed</span>
+    </button>
+  </nav>
+
+  <!-- ===================================================================== -->
+  <!-- ADD / EDIT TASK MODAL DIALOG                                          -->
+  <!-- ===================================================================== -->
+  <div id="taskModalOverlay" class="hidden fixed inset-0 z-50 bg-royal-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+    <div id="taskModalDialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl border border-lavender-200 overflow-hidden animate-card">
+      <!-- Modal Header -->
+      <div class="px-6 py-5 bg-lavender-100 border-b border-lavender-200 flex items-center justify-between">
+        <div>
+          <h3 id="modalTitle" class="text-lg font-extrabold text-royal-900">Add New Task</h3>
+          <p class="text-xs text-royal-700/80 mt-0.5">Fill in the details for your school activity</p>
+        </div>
+        <button id="closeModalBtn" type="button" aria-label="Close modal" class="p-2 rounded-xl text-royal-800 hover:bg-lavender-200 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Task Form -->
+      <form id="taskForm" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+        <input type="hidden" id="taskIdField" value="" />
+
+        <!-- Task Title -->
+        <div>
+          <label for="taskTitleField" class="block text-xs font-bold uppercase tracking-wider text-royal-900 mb-1.5">
+            Task Title <span class="text-rose-500">*</span>
+          </label>
+          <input
+            id="taskTitleField"
+            type="text"
+            required
+            maxlength="100"
+            placeholder="e.g., Data Structures Binary Tree Lab"
+            class="w-full px-4 py-3 rounded-xl bg-lavender-50 border border-lavender-300 focus:bg-white focus:border-royal-700 focus:ring-2 focus:ring-royal-700/20 text-sm text-slate-800 outline-none transition-all"
+          />
+        </div>
+
+        <!-- Subject & Activity Type (Polymorphic Subclass Selector) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="taskSubjectField" class="block text-xs font-bold uppercase tracking-wider text-royal-900 mb-1.5">
+              Subject / Course <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="taskSubjectField"
+              type="text"
+              required
+              list="subjectSuggestions"
+              maxlength="60"
+              placeholder="e.g., Computer Science"
+              class="w-full px-4 py-3 rounded-xl bg-lavender-50 border border-lavender-300 focus:bg-white focus:border-royal-700 focus:ring-2 focus:ring-royal-700/20 text-sm text-slate-800 outline-none transition-all"
+            />
+            <datalist id="subjectSuggestions">
+              <option value="Computer Science"></option>
+              <option value="Mathematics"></option>
+              <option value="Biology"></option>
+              <option value="Physics"></option>
+              <option value="World History"></option>
+              <option value="English Literature"></option>
+              <option value="Chemistry"></option>
+            </datalist>
+          </div>
+
+          <div>
+            <label for="taskTypeField" class="block text-xs font-bold uppercase tracking-wider text-royal-900 mb-1.5">
+              Activity Type (OOP)
+            </label>
+            <select
+              id="taskTypeField"
+              class="w-full px-4 py-3 rounded-xl bg-lavender-50 border border-lavender-300 focus:bg-white focus:border-royal-700 focus:ring-2 focus:ring-royal-700/20 text-sm text-slate-800 outline-none transition-all"
+            >
+              <option value="Assignment">📝 Assignment</option>
+              <option value="Project">🚀 Group / Capstone Project</option>
+              <option value="Exam">🎯 Exam / Quiz Prep</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Deadline & Priority -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="taskDeadlineField" class="block text-xs font-bold uppercase tracking-wider text-royal-900 mb-1.5">
+              Deadline Date <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="taskDeadlineField"
+              type="date"
+              required
+              class="w-full px-4 py-3 rounded-xl bg-lavender-50 border border-lavender-300 focus:bg-white focus:border-royal-700 focus:ring-2 focus:ring-royal-700/20 text-sm text-slate-800 outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label for="taskPriorityField" class="block text-xs font-bold uppercase tracking-wider text-royal-900 mb-1.5">
+              Priority Level
+            </label>
+            <select
+              id="taskPriorityField"
+              class="w-full px-4 py-3 rounded-xl bg-lavender-50 border border-lavender-300 focus:bg-white focus:border-royal-700 focus:ring-2 focus:ring-royal-700/20 text-sm text-slate-800 outline-none transition-all"
+            >
+              <option value="Low">🟢 Low Priority</option>
+              <option value="Medium" selected>🟡 Medium Priority</option>
+              <option value="High">🔴 High Priority</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Form Error Banner -->
+        <p id="formErrorText" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-3.5 py-2.5 rounded-xl"></p>
+
+        <!-- Action Buttons -->
+        <div class="pt-3 flex items-center justify-end gap-3 border-t border-lavender-100">
+          <button id="cancelModalBtn" type="button" class="px-5 py-2.5 rounded-xl border border-lavender-300 text-slate-700 hover:bg-lavender-100 font-semibold text-sm transition-colors">
+            Cancel
+          </button>
+          <button id="saveTaskBtn" type="submit" class="px-6 py-2.5 rounded-xl bg-royal-800 hover:bg-royal-900 text-white font-semibold text-sm shadow-md transition-all active:scale-95">
+            Save Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- CUSTOM CONFIRMATION MODAL (Replaces browser confirm() cleanly)        -->
+  <!-- ===================================================================== -->
+  <div id="confirmModalOverlay" class="hidden fixed inset-0 z-50 bg-royal-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div role="dialog" aria-modal="true" class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-lavender-200 animate-card">
+      <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
+      <h4 id="confirmTitle" class="text-lg font-extrabold text-royal-900">Delete Task?</h4>
+      <p id="confirmMessage" class="text-sm text-slate-600 mt-1.5">Are you sure you want to remove this task? This action cannot be undone.</p>
+      <div class="mt-6 flex items-center justify-end gap-2.5">
+        <button id="confirmCancelBtn" type="button" class="px-4 py-2.5 rounded-xl border border-lavender-300 text-slate-700 hover:bg-lavender-100 text-xs font-bold transition-colors">
+          Keep Task
+        </button>
+        <button id="confirmProceedBtn" type="button" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-colors">
+          Yes, Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TOAST NOTIFICATION CONTAINER                                          -->
+  <!-- ===================================================================== -->
+  <div id="toastContainer" class="fixed bottom-20 lg:bottom-6 right-4 left-4 sm:left-auto sm:w-80 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- OBJECT-ORIENTED JAVASCRIPT ARCHITECTURE                               -->
+  <!-- ===================================================================== -->
+  <script>
+    /**
+     * =========================================================================
+     * STUDYNEST – OBJECT-ORIENTED PROGRAMMING (OOP) IMPLEMENTATION
+     * =========================================================================
+     * 1. ENCAPSULATION:
+     *    - Base `Task` and derived `SchoolTask` classes protect internal state
+     *      using ES2022 private class fields (`#id`, `#title`, `#subject`, etc.)
+     *      exposed strictly through validated getters, setters, and methods.
+     *
+     * 2. INHERITANCE:
+     *    - `SchoolTask` extends `Task` to inherit core properties & methods while
+     *      adding academic fields (`#subject`, `#taskType`).
+     *    - `ProjectTask` and `ExamTask` further extend `SchoolTask` to model
+     *      specialized academic deliverables.
+     *
+     * 3. POLYMORPHISM:
+     *    - Method overriding (`getCategoryMeta()`, `getStudyAdvice()`, and
+     *      `calculateUrgencyScore()`) allows `Task`, `SchoolTask`, `ProjectTask`,
+     *      and `ExamTask` instances to respond dynamically to the exact same
+     *      method calls with specialized UI badges, study tips, and sorting weights.
+     *
+     * 4. ABSTRACTION:
+     *    - `StorageService` hides LocalStorage serialization & polymorphic
+     *      class hydration behind clean `load()` and `save()` methods.
+     *    - `TaskManager` abstracts CRUD operations, filtering, and analytics.
+     *    - `StudyNestUI` abstracts DOM rendering, SPA routing, and user events.
+     * =========================================================================
+     */
+
+    // =========================================================================
+    // 1. BASE CLASS: Task (Demonstrates ENCAPSULATION)
+    // =========================================================================
+    class Task {
+      // Private fields: inaccessible directly from outside the class
+      #id;
+      #title;
+      #deadline;
+      #priority;
+      #completed;
+      #createdAt;
+
+      constructor({ id = null, title, deadline, priority = 'Medium', completed = false, createdAt = null }) {
+        this.#id = id || `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        this.title = title; // Uses setter for validation
+        this.deadline = deadline; // Uses setter for validation
+        this.priority = priority; // Uses setter for validation
+        this.#completed = Boolean(completed);
+        this.#createdAt = createdAt || new Date().toISOString();
+      }
+
+      // Controlled Getters
+      get id() { return this.#id; }
+      get title() { return this.#title; }
+      get deadline() { return this.#deadline; }
+      get priority() { return this.#priority; }
+      get completed() { return this.#completed; }
+      get createdAt() { return this.#createdAt; }
+
+      // Controlled Setters with encapsulation validation
+      set title(newTitle) {
+        const cleaned = String(newTitle || '').trim();
+        if (!cleaned) {
+          throw new Error('Task title cannot be empty.');
+        }
+        this.#title = cleaned;
+      }
+
+      set deadline(newDeadline) {
+        if (!newDeadline) {
+          throw new Error('A valid deadline date is required.');
+        }
+        this.#deadline = String(newDeadline);
+      }
+
+      set priority(newPriority) {
+        const allowed = ['Low', 'Medium', 'High'];
+        this.#priority = allowed.includes(newPriority) ? newPriority : 'Medium';
+      }
+
+      // Encapsulated state mutators
+      toggleComplete() {
+        this.#completed = !this.#completed;
+        return this.#completed;
+      }
+
+      setCompleted(status) {
+        this.#completed = Boolean(status);
+      }
+
+      /**
+       * Polymorphic Base Method #1: Category display metadata
+       * Subclasses override this to provide distinct badges & icons.
+       */
+      getCategoryMeta() {
+        return {
+          label: 'General Task',
+          badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+          icon: '📌'
+        };
+      }
+
+      /**
+       * Polymorphic Base Method #2: Actionable study/productivity tip
+       */
+      getStudyAdvice() {
+        return 'Break this task into 25-minute Pomodoro focus sessions.';
+      }
+
+      /**
+       * Polymorphic Base Method #3: Numeric urgency score for smart sorting
+       */
+      calculateUrgencyScore() {
+        const priorityWeights = { High: 30, Medium: 20, Low: 10 };
+        return priorityWeights[this.#priority] || 10;
+      }
+
+      // Serialization helper for LocalStorage persistence
+      toJSON() {
+        return {
+          id: this.#id,
+          title: this.#title,
+          deadline: this.#deadline,
+          priority: this.#priority,
+          completed: this.#completed,
+          createdAt: this.#createdAt
+        };
+      }
+    }
+
+    // =========================================================================
+    // 2. DERIVED CLASS: SchoolTask (Demonstrates INHERITANCE & POLYMORPHISM)
+    // =========================================================================
+    class SchoolTask extends Task {
+      #subject;
+      #taskType;
+
+      constructor(data) {
+        // Call parent Task constructor
+        super(data);
+        this.subject = data.subject || 'General Studies';
+        this.#taskType = data.taskType || 'Assignment';
+      }
+
+      get subject() { return this.#subject; }
+      get taskType() { return this.#taskType; }
+
+      set subject(newSubject) {
+        const cleaned = String(newSubject || '').trim();
+        if (!cleaned) {
+          throw new Error('Subject name is required for a school task.');
+        }
+        this.#subject = cleaned;
+      }
+
+      // Overridden Polymorphic Method #1
+      getCategoryMeta() {
+        return {
+          label: 'Assignment',
+          badgeClass: 'bg-lavender-200 text-royal-900 border-lavender-300',
+          icon: '📝'
+        };
+      }
+
+      // Overridden Polymorphic Method #2
+      getStudyAdvice() {
+        return `Review your ${this.#subject} lecture notes before drafting your submission.`;
+      }
+
+      // Overridden Polymorphic Method #3 (combines parent priority weight + deadline proximity)
+      calculateUrgencyScore() {
+        let score = super.calculateUrgencyScore();
+        const daysLeft = this.getDaysRemaining();
+        if (daysLeft < 0) score += 50;       // Overdue
+        else if (daysLeft <= 2) score += 30; // Due very soon
+        else if (daysLeft <= 5) score += 15;
+        return score;
+      }
+
+      // Helper method to compute days until deadline
+      getDaysRemaining() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const [year, month, day] = this.deadline.split('-').map(Number);
+        const due = new Date(year, month - 1, day);
+        const diffMs = due - today;
+        return Math.round(diffMs / (1000 * 60 * 60 * 24));
+      }
+
+      toJSON() {
+        return {
+          ...super.toJSON(),
+          subject: this.#subject,
+          taskType: this.#taskType
+        };
+      }
+    }
+
+    // =========================================================================
+    // 2B. SPECIALIZED SUBCLASSES: ProjectTask & ExamTask (Deep POLYMORPHISM)
+    // =========================================================================
+    class ProjectTask extends SchoolTask {
+      constructor(data) {
+        super({ ...data, taskType: 'Project' });
+      }
+
+      getCategoryMeta() {
+        return {
+          label: 'Project',
+          badgeClass: 'bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200',
+          icon: '🚀'
+        };
+      }
+
+      getStudyAdvice() {
+        return `Milestone check: Outline deliverables & test prototypes early for ${this.subject}.`;
+      }
+
+      calculateUrgencyScore() {
+        // Projects require earlier preparation than standard homework
+        return super.calculateUrgencyScore() + 8;
+      }
+    }
+
+    class ExamTask extends SchoolTask {
+      constructor(data) {
+        super({ ...data, taskType: 'Exam' });
+      }
+
+      getCategoryMeta() {
+        return {
+          label: 'Exam / Quiz',
+          badgeClass: 'bg-indigo-100 text-indigo-900 border-indigo-200',
+          icon: '🎯'
+        };
+      }
+
+      getStudyAdvice() {
+        return `Active recall: Practice past problems & flashcards for ${this.subject}.`;
+      }
+
+      calculateUrgencyScore() {
+        // Exams carry highest academic urgency boost
+        return super.calculateUrgencyScore() + 12;
+      }
+    }
+
+    // =========================================================================
+    // 3. ABSTRACTION LAYER 1: StorageService (LocalStorage Persistence)
+    // =========================================================================
+    class StorageService {
+      #storageKey;
+      #initFlagKey;
+
+      constructor(storageKey = 'studynest_tasks_v1', initFlagKey = 'studynest_initialized_v1') {
+        this.#storageKey = storageKey;
+        this.#initFlagKey = initFlagKey;
+      }
+
+      /**
+       * Factory helper that re-hydrates plain JSON objects into the proper
+       * polymorphic class instance (`SchoolTask`, `ProjectTask`, or `ExamTask`).
+       */
+      static hydrateTask(rawObj) {
+        switch (rawObj.taskType) {
+          case 'Project':
+            return new ProjectTask(rawObj);
+          case 'Exam':
+            return new ExamTask(rawObj);
+          default:
+            return new SchoolTask(rawObj);
+        }
+      }
+
+      isFirstVisit() {
+        return !localStorage.getItem(this.#initFlagKey);
+      }
+
+      markInitialized() {
+        localStorage.setItem(this.#initFlagKey, 'true');
+      }
+
+      loadTasks() {
+        try {
+          const raw = localStorage.getItem(this.#storageKey);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          return parsed.map(item => StorageService.hydrateTask(item));
+        } catch (err) {
+          console.error('Failed to load tasks from LocalStorage:', err);
+          return [];
+        }
+      }
+
+      saveTasks(taskInstances) {
+        try {
+          const serialized = JSON.stringify(taskInstances.map(task => task.toJSON()));
+          localStorage.setItem(this.#storageKey, serialized);
+          this.markInitialized();
+        } catch (err) {
+          console.error('Failed to save tasks to LocalStorage:', err);
+        }
+      }
+    }
+
+    // =========================================================================
+    // 4. ABSTRACTION LAYER 2: TaskManager (Business Logic & State Management)
+    // =========================================================================
+    class TaskManager {
+      #tasks;
+      #storage;
+
+      constructor(storageService) {
+        this.#storage = storageService;
+        this.#tasks = [];
+        this.#initialize();
+      }
+
+      #initialize() {
+        if (this.#storage.isFirstVisit()) {
+          this.loadSampleTasks();
+        } else {
+          this.#tasks = this.#storage.loadTasks();
+        }
+      }
+
+      /**
+       * Generates realistic sample student tasks with dynamic upcoming dates
+       */
+      loadSampleTasks() {
+        const formatOffsetDate = (offsetDays) => {
+          const d = new Date();
+          d.setDate(d.getDate() + offsetDays);
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${yyyy}-${mm}-${dd}`;
+        };
+
+        const sampleData = [
+          {
+            title: 'Object-Oriented Programming Case Study',
+            subject: 'Computer Science',
+            taskType: 'Project',
+            deadline: formatOffsetDate(2),
+            priority: 'High',
+            completed: false
+          },
+          {
+            title: 'Calculus II Integration Problem Set #4',
+            subject: 'Mathematics',
+            taskType: 'Assignment',
+            deadline: formatOffsetDate(1),
+            priority: 'High',
+            completed: false
+          },
+          {
+            title: 'Cellular Respiration & Genetics Midterm Review',
+            subject: 'Biology',
+            taskType: 'Exam',
+            deadline: formatOffsetDate(4),
+            priority: 'Medium',
+            completed: false
+          },
+          {
+            title: 'Industrial Revolution Primary Source Essay',
+            subject: 'World History',
+            taskType: 'Assignment',
+            deadline: formatOffsetDate(-1),
+            priority: 'Medium',
+            completed: true
+          },
+          {
+            title: 'Modern Poetry Analysis Presentation Slides',
+            subject: 'English Literature',
+            taskType: 'Project',
+            deadline: formatOffsetDate(6),
+            priority: 'Low',
+            completed: false
+          }
+        ];
+
+        this.#tasks = sampleData.map(item => StorageService.hydrateTask(item));
+        this.#persist();
+      }
+
+      #persist() {
+        this.#storage.saveTasks(this.#tasks);
+      }
+
+      addTask(taskData) {
+        const newTask = StorageService.hydrateTask(taskData);
+        this.#tasks.unshift(newTask);
+        this.#persist();
+        return newTask;
+      }
+
+      updateTask(id, updatedData) {
+        const index = this.#tasks.findIndex(t => t.id === id);
+        if (index === -1) return null;
+
+        const existing = this.#tasks[index];
+        // Re-instantiate via factory so changing taskType swaps polymorphic subclass cleanly
+        const updatedInstance = StorageService.hydrateTask({
+          id: existing.id,
+          createdAt: existing.createdAt,
+          completed: existing.completed,
+          title: updatedData.title,
+          subject: updatedData.subject,
+          taskType: updatedData.taskType,
+          deadline: updatedData.deadline,
+          priority: updatedData.priority
+        });
+
+        this.#tasks[index] = updatedInstance;
+        this.#persist();
+        return updatedInstance;
+      }
+
+      deleteTask(id) {
+        const initialLen = this.#tasks.length;
+        this.#tasks = this.#tasks.filter(t => t.id !== id);
+        if (this.#tasks.length !== initialLen) {
+          this.#persist();
+          return true;
+        }
+        return false;
+      }
+
+      toggleTaskStatus(id) {
+        const task = this.#tasks.find(t => t.id === id);
+        if (!task) return null;
+        task.toggleComplete();
+        this.#persist();
+        return task;
+      }
+
+      getTaskById(id) {
+        return this.#tasks.find(t => t.id === id) || null;
+      }
+
+      /**
+       * Returns filtered and polymorphically urgency-sorted tasks
+       */
+      queryTasks({ route = 'dashboard', searchQuery = '', priorityFilter = 'all' }) {
+        const query = searchQuery.trim().toLowerCase();
+
+        return this.#tasks
+          .filter(task => {
+            // Route filter
+            if (route === 'pending' && task.completed) return false;
+            if (route === 'completed' && !task.completed) return false;
+
+            // Priority filter
+            if (priorityFilter !== 'all' && task.priority !== priorityFilter) return false;
+
+            // Search query filter (matches title or subject)
+            if (query) {
+              const matchesTitle = task.title.toLowerCase().includes(query);
+              const matchesSubject = task.subject.toLowerCase().includes(query);
+              if (!matchesTitle && !matchesSubject) return false;
+            }
+
+            return true;
+          })
+          .sort((a, b) => {
+            // Incomplete tasks appear before completed tasks on Dashboard
+            if (a.completed !== b.completed) {
+              return a.completed ? 1 : -1;
+            }
+            // Sort by polymorphic urgency score descending, then deadline ascending
+            const urgencyDiff = b.calculateUrgencyScore() - a.calculateUrgencyScore();
+            if (urgencyDiff !== 0) return urgencyDiff;
+            return a.deadline.localeCompare(b.deadline);
+          });
+      }
+
+      getStatistics() {
+        const total = this.#tasks.length;
+        const completed = this.#tasks.filter(t => t.completed).length;
+        const pending = total - completed;
+        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+        return { total, pending, completed, percentage };
+      }
+    }
+
+    // =========================================================================
+    // 5. ABSTRACTION LAYER 3: StudyNestUI (DOM Rendering & Event Controller)
+    // =========================================================================
+    class StudyNestUI {
+      #manager;
+      #state;
+      #pendingConfirmAction;
+
+      constructor(taskManager) {
+        this.#manager = taskManager;
+        this.#state = {
+          route: 'dashboard',       // 'dashboard' | 'pending' | 'completed'
+          searchQuery: '',
+          priorityFilter: 'all'
+        };
+        this.#pendingConfirmAction = null;
+
+        this.#cacheDOM();
+        this.#bindEvents();
+        this.#renderDateHeader();
+        this.render();
+      }
+
+      #cacheDOM() {
+        this.dom = {
+          // Navigation
+          desktopNavLinks: document.querySelectorAll('.nav-link'),
+          mobileNavLinks: document.querySelectorAll('.mobile-nav-link'),
+          navBadgeAll: document.getElementById('navBadgeAll'),
+          navBadgePending: document.getElementById('navBadgePending'),
+          navBadgeCompleted: document.getElementById('navBadgeCompleted'),
+
+          // Header & Dashboard Metrics
+          currentDateBadge: document.getElementById('currentDateBadge'),
+          dashboardMetricsSection: document.getElementById('dashboardMetricsSection'),
+          statTotal: document.getElementById('statTotal'),
+          statPending: document.getElementById('statPending'),
+          statCompleted: document.getElementById('statCompleted'),
+          progressCaption: document.getElementById('progressCaption'),
+          progressPercentage: document.getElementById('progressPercentage'),
+          progressBarFill: document.getElementById('progressBarFill'),
+
+          // View Headers & Filters
+          viewTitle: document.getElementById('viewTitle'),
+          viewSubtitle: document.getElementById('viewSubtitle'),
+          searchInput: document.getElementById('searchInput'),
+          clearSearchBtn: document.getElementById('clearSearchBtn'),
+          priorityPills: document.querySelectorAll('.priority-pill'),
+
+          // Task List & Empty State
+          taskListContainer: document.getElementById('taskListContainer'),
+          emptyStateContainer: document.getElementById('emptyStateContainer'),
+          emptyStateTitle: document.getElementById('emptyStateTitle'),
+          emptyStateMessage: document.getElementById('emptyStateMessage'),
+
+          // Add/Edit Modal
+          modalOverlay: document.getElementById('taskModalOverlay'),
+          modalTitle: document.getElementById('modalTitle'),
+          taskForm: document.getElementById('taskForm'),
+          taskIdField: document.getElementById('taskIdField'),
+          taskTitleField: document.getElementById('taskTitleField'),
+          taskSubjectField: document.getElementById('taskSubjectField'),
+          taskTypeField: document.getElementById('taskTypeField'),
+          taskDeadlineField: document.getElementById('taskDeadlineField'),
+          taskPriorityField: document.getElementById('taskPriorityField'),
+          formErrorText: document.getElementById('formErrorText'),
+
+          // Confirm Modal & Toast
+          confirmOverlay: document.getElementById('confirmModalOverlay'),
+          confirmTitle: document.getElementById('confirmTitle'),
+          confirmMessage: document.getElementById('confirmMessage'),
+          confirmProceedBtn: document.getElementById('confirmProceedBtn'),
+          confirmCancelBtn: document.getElementById('confirmCancelBtn'),
+          toastContainer: document.getElementById('toastContainer')
+        };
+      }
+
+      #bindEvents() {
+        // Open Add Task Modal Triggers
+        ['desktopAddBtn', 'mobileHeaderAddBtn', 'bannerAddBtn', 'emptyAddBtn'].forEach(btnId => {
+          const el = document.getElementById(btnId);
+          if (el) el.addEventListener('click', () => this.openTaskModal());
+        });
+
+        // Close Add/Edit Modal
+        document.getElementById('closeModalBtn').addEventListener('click', () => this.closeTaskModal());
+        document.getElementById('cancelModalBtn').addEventListener('click', () => this.closeTaskModal());
+        this.dom.modalOverlay.addEventListener('click', (e) => {
+          if (e.target === this.dom.modalOverlay) this.closeTaskModal();
+        });
+
+        // Form Submission (Create or Update)
+        this.dom.taskForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.#handleFormSubmit();
+        });
+
+        // SPA Route Navigation (Desktop + Mobile)
+        [...this.dom.desktopNavLinks, ...this.dom.mobileNavLinks].forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.#state.route = btn.dataset.route;
+            this.render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        });
+
+        // Live Search Input
+        this.dom.searchInput.addEventListener('input', (e) => {
+          this.#state.searchQuery = e.target.value;
+          this.dom.clearSearchBtn.classList.toggle('hidden', !this.#state.searchQuery);
+          this.#renderTaskCards();
+        });
+
+        this.dom.clearSearchBtn.addEventListener('click', () => {
+          this.#state.searchQuery = '';
+          this.dom.searchInput.value = '';
+          this.dom.clearSearchBtn.classList.add('hidden');
+          this.#renderTaskCards();
+        });
+
+        // Priority Filter Pills
+        this.dom.priorityPills.forEach(pill => {
+          pill.addEventListener('click', () => {
+            this.#state.priorityFilter = pill.dataset.priorityFilter;
+            this.#updatePriorityPillsUI();
+            this.#renderTaskCards();
+          });
+        });
+
+        // Event Delegation for Task Card Actions (Toggle, Edit, Delete)
+        this.dom.taskListContainer.addEventListener('click', (e) => {
+          const actionBtn = e.target.closest('[data-action]');
+          if (!actionBtn) return;
+
+          const action = actionBtn.dataset.action;
+          const taskId = actionBtn.dataset.id;
+
+          if (action === 'toggle') {
+            const task = this.#manager.toggleTaskStatus(taskId);
+            if (task) {
+              this.showToast(
+                task.completed ? `Completed "${task.title}" 🎉` : `Marked "${task.title}" as pending`,
+                task.completed ? 'success' : 'info'
+              );
+              this.render();
+            }
+          } else if (action === 'edit') {
+            const task = this.#manager.getTaskById(taskId);
+            if (task) this.openTaskModal(task);
+          } else if (action === 'delete') {
+            const task = this.#manager.getTaskById(taskId);
+            if (task) {
+              this.#openConfirmDialog(
+                'Delete Academic Task?',
+                `Are you sure you want to delete "${task.title}"?`,
+                () => {
+                  this.#manager.deleteTask(taskId);
+                  this.showToast('Task removed from StudyNest.', 'info');
+                  this.render();
+                }
+              );
+            }
+          }
+        });
+
+        // Restore Sample Tasks Buttons
+        ['resetSamplesBtnDesktop', 'resetSamplesBtnMobile'].forEach(btnId => {
+          const btn = document.getElementById(btnId);
+          if (btn) {
+            btn.addEventListener('click', () => {
+              this.#openConfirmDialog(
+                'Restore Sample Tasks?',
+                'This will replace your current task list with the default sample student tasks.',
+                () => {
+                  this.#manager.loadSampleTasks();
+                  this.showToast('Sample student tasks restored!', 'success');
+                  this.render();
+                }
+              );
+            });
+          }
+        });
+
+        // Confirm Modal Controls
+        this.dom.confirmCancelBtn.addEventListener('click', () => this.#closeConfirmDialog());
+        this.dom.confirmProceedBtn.addEventListener('click', () => {
+          if (typeof this.#pendingConfirmAction === 'function') {
+            this.#pendingConfirmAction();
+          }
+          this.#closeConfirmDialog();
+        });
+      }
+
+      #renderDateHeader() {
+        const now = new Date();
+        const formatted = now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        });
+        this.dom.currentDateBadge.textContent = `📅 ${formatted}`;
+      }
+
+      render() {
+        this.#updateNavigationUI();
+        this.#updateMetricsUI();
+        this.#updateViewHeaderUI();
+        this.#updatePriorityPillsUI();
+        this.#renderTaskCards();
+      }
+
+      #updateNavigationUI() {
+        const stats = this.#manager.getStatistics();
+        this.dom.navBadgeAll.textContent = stats.total;
+        this.dom.navBadgePending.textContent = stats.pending;
+        this.dom.navBadgeCompleted.textContent = stats.completed;
+
+        // Desktop sidebar active styling
+        this.dom.desktopNavLinks.forEach(btn => {
+          const isActive = btn.dataset.route === this.#state.route;
+          btn.classList.toggle('bg-royal-800', isActive);
+          btn.classList.toggle('text-white', isActive);
+          btn.classList.toggle('shadow-sm', isActive);
+          btn.classList.toggle('text-slate-600', !isActive);
+          btn.classList.toggle('hover:bg-lavender-100', !isActive);
+          btn.classList.toggle('hover:text-royal-900', !isActive);
+        });
+
+        // Mobile bottom nav active styling
+        this.dom.mobileNavLinks.forEach(btn => {
+          const isActive = btn.dataset.route === this.#state.route;
+          btn.classList.toggle('text-royal-800', isActive);
+          btn.classList.toggle('bg-lavender-100', isActive);
+          btn.classList.toggle('text-slate-500', !isActive);
+        });
+      }
+
+      #updateMetricsUI() {
+        const { total, pending, completed, percentage } = this.#manager.getStatistics();
+
+        // Show full dashboard cards on Dashboard view; keep compact on sub-views
+        this.dom.dashboardMetricsSection.classList.toggle('hidden', this.#state.route !== 'dashboard');
+
+        this.dom.statTotal.textContent = total;
+        this.dom.statPending.textContent = pending;
+        this.dom.statCompleted.textContent = completed;
+
+        this.dom.progressCaption.textContent = `${completed} of ${total} tasks completed`;
+        this.dom.progressPercentage.textContent = `${percentage}%`;
+        this.dom.progressBarFill.style.width = `${percentage}%`;
+      }
+
+      #updateViewHeaderUI() {
+        const headers = {
+          dashboard: {
+            title: 'Dashboard Overview',
+            subtitle: 'All your academic tasks prioritized by urgency and deadline'
+          },
+          pending: {
+            title: 'Pending Tasks',
+            subtitle: 'Focus on upcoming assignments, projects, and exam prep'
+          },
+          completed: {
+            title: 'Completed Tasks',
+            subtitle: 'Great work! Review everything you have accomplished'
+          }
+        };
+
+        const current = headers[this.#state.route] || headers.dashboard;
+        this.dom.viewTitle.textContent = current.title;
+        this.dom.viewSubtitle.textContent = current.subtitle;
+      }
+
+      #updatePriorityPillsUI() {
+        this.dom.priorityPills.forEach(pill => {
+          const isActive = pill.dataset.priorityFilter === this.#state.priorityFilter;
+          pill.classList.toggle('bg-royal-800', isActive);
+          pill.classList.toggle('text-white', isActive);
+          pill.classList.toggle('shadow-xs', isActive);
+          pill.classList.toggle('bg-white', !isActive);
+          pill.classList.toggle('text-slate-600', !isActive);
+          pill.classList.toggle('border', !isActive);
+          pill.classList.toggle('border-lavender-200', !isActive);
+          pill.classList.toggle('hover:bg-lavender-200/60', !isActive);
+        });
+      }
+
+      #renderTaskCards() {
+        const tasks = this.#manager.queryTasks(this.#state);
+
+        if (tasks.length === 0) {
+          this.dom.taskListContainer.innerHTML = '';
+          this.dom.emptyStateContainer.classList.remove('hidden');
+
+          if (this.#state.searchQuery || this.#state.priorityFilter !== 'all') {
+            this.dom.emptyStateTitle.textContent = 'No matching tasks';
+            this.dom.emptyStateMessage.textContent = 'Try adjusting your search keywords or clearing your priority filter.';
+          } else if (this.#state.route === 'completed') {
+            this.dom.emptyStateTitle.textContent = 'No completed tasks yet';
+            this.dom.emptyStateMessage.textContent = 'Check off a pending task once you finish it to see your progress grow!';
+          } else {
+            this.dom.emptyStateTitle.textContent = 'Your study nest is clear!';
+            this.dom.emptyStateMessage.textContent = 'Add a new assignment, exam review, or project to organize your schedule.';
+          }
+          return;
+        }
+
+        this.dom.emptyStateContainer.classList.add('hidden');
+        this.dom.taskListContainer.innerHTML = tasks.map(task => this.#createTaskCardHTML(task)).join('');
+      }
+
+      /**
+       * Renders an individual task card using Polymorphic methods from SchoolTask subclasses
+       */
+      #createTaskCardHTML(task) {
+        // Polymorphic method calls
+        const categoryMeta = task.getCategoryMeta();
+        const studyAdvice = task.getStudyAdvice();
+
+        // Priority badge styling
+        const priorityStyles = {
+          High: 'bg-rose-50 text-rose-700 border-rose-200',
+          Medium: 'bg-amber-50 text-amber-700 border-amber-200',
+          Low: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+        };
+        const priorityDots = {
+          High: 'bg-rose-500',
+          Medium: 'bg-amber-500',
+          Low: 'bg-emerald-500'
+        };
+
+        // Deadline formatting & relative status
+        const daysLeft = task.getDaysRemaining();
+        const [y, m, d] = task.deadline.split('-').map(Number);
+        const formattedDate = new Date(y, m - 1, d).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+
+        let deadlineTag = `<span class="text-slate-500 font-medium">Due ${formattedDate}</span>`;
+        if (!task.completed) {
+          if (daysLeft < 0) {
+            deadlineTag = `<span class="text-rose-600 font-bold">Overdue (${formattedDate})</span>`;
+          } else if (daysLeft === 0) {
+            deadlineTag = `<span class="text-amber-600 font-bold">Due Today!</span>`;
+          } else if (daysLeft === 1) {
+            deadlineTag = `<span class="text-royal-800 font-semibold">Due Tomorrow (${formattedDate})</span>`;
+          }
+        }
+
+        return `
+          <article class="animate-card bg-white rounded-2xl p-5 border ${task.completed ? 'border-lavender-200/80 opacity-80' : 'border-lavender-200 hover:border-royal-600/40'} shadow-soft hover:shadow-card-hover transition-all duration-200 flex flex-col justify-between gap-4">
+            <div>
+              <!-- Top Row: Subject & Polymorphic Type + Priority Badges -->
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-royal-900 text-white">
+                    ${this.#escapeHTML(task.subject)}
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border ${categoryMeta.badgeClass}">
+                    <span>${categoryMeta.icon}</span>
+                    <span>${categoryMeta.label}</span>
+                  </span>
+                </div>
+
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${priorityStyles[task.priority]}">
+                  <span class="w-1.5 h-1.5 rounded-full ${priorityDots[task.priority]}"></span>
+                  ${task.priority}
+                </span>
+              </div>
+
+              <!-- Middle Row: Completion Checkbox & Task Title -->
+              <div class="flex items-start gap-3">
+                <button
+                  type="button"
+                  data-action="toggle"
+                  data-id="${task.id}"
+                  aria-label="${task.completed ? 'Mark task as pending' : 'Mark task as completed'}"
+                  class="mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
+                    task.completed
+                      ? 'bg-emerald-500 border-emerald-500 text-white'
+                      : 'border-lavender-400 hover:border-royal-700 bg-lavender-50'
+                  }"
+                >
+                  ${task.completed ? `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  ` : ''}
+                </button>
+
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-base font-bold leading-snug break-words ${task.completed ? 'line-through text-slate-400' : 'text-royal-900'}">
+                    ${this.#escapeHTML(task.title)}
+                  </h4>
+                  <!-- Polymorphic Study Tip Box -->
+                  <p class="mt-2 text-xs text-royal-800/80 bg-lavender-100/80 border border-lavender-200/80 rounded-xl px-3 py-2 leading-relaxed">
+                    💡 ${this.#escapeHTML(studyAdvice)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Row: Deadline & Action Controls -->
+            <div class="pt-3 border-t border-lavender-100 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 text-xs">
+                <svg class="w-4 h-4 text-royal-700 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+                ${deadlineTag}
+              </div>
+
+              <div class="flex items-center gap-1">
+                <button
+                  type="button"
+                  data-action="edit"
+                  data-id="${task.id}"
+                  title="Edit task"
+                  class="p-2 rounded-xl text-royal-700 hover:bg-lavender-100 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  data-action="delete"
+                  data-id="${task.id}"
+                  title="Delete task"
+                  class="p-2 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      openTaskModal(taskToEdit = null) {
+        this.dom.formErrorText.classList.add('hidden');
+        this.dom.taskForm.reset();
+
+        if (taskToEdit) {
+          this.dom.modalTitle.textContent = 'Edit Academic Task';
+          this.dom.taskIdField.value = taskToEdit.id;
+          this.dom.taskTitleField.value = taskToEdit.title;
+          this.dom.taskSubjectField.value = taskToEdit.subject;
+          this.dom.taskTypeField.value = taskToEdit.taskType;
+          this.dom.taskDeadlineField.value = taskToEdit.deadline;
+          this.dom.taskPriorityField.value = taskToEdit.priority;
+        } else {
+          this.dom.modalTitle.textContent = 'Add New Task';
+          this.dom.taskIdField.value = '';
+          // Default deadline to tomorrow for quick student entry
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const yyyy = tomorrow.getFullYear();
+          const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+          const dd = String(tomorrow.getDate()).padStart(2, '0');
+          this.dom.taskDeadlineField.value = `${yyyy}-${mm}-${dd}`;
+          this.dom.taskPriorityField.value = 'Medium';
+          this.dom.taskTypeField.value = 'Assignment';
+        }
+
+        this.dom.modalOverlay.classList.remove('hidden');
+        setTimeout(() => this.dom.taskTitleField.focus(), 60);
+      }
+
+      closeTaskModal() {
+        this.dom.modalOverlay.classList.add('hidden');
+      }
+
+      #handleFormSubmit() {
+        try {
+          const id = this.dom.taskIdField.value.trim();
+          const payload = {
+            title: this.dom.taskTitleField.value,
+            subject: this.dom.taskSubjectField.value,
+            taskType: this.dom.taskTypeField.value,
+            deadline: this.dom.taskDeadlineField.value,
+            priority: this.dom.taskPriorityField.value
+          };
+
+          if (id) {
+            this.#manager.updateTask(id, payload);
+            this.showToast('Task updated successfully!', 'success');
+          } else {
+            this.#manager.addTask(payload);
+            this.showToast('New task added to StudyNest!', 'success');
+          }
+
+          this.closeTaskModal();
+          this.render();
+        } catch (err) {
+          this.dom.formErrorText.textContent = err.message;
+          this.dom.formErrorText.classList.remove('hidden');
+        }
+      }
+
+      #openConfirmDialog(title, message, onConfirm) {
+        this.dom.confirmTitle.textContent = title;
+        this.dom.confirmMessage.textContent = message;
+        this.#pendingConfirmAction = onConfirm;
+        this.dom.confirmOverlay.classList.remove('hidden');
+      }
+
+      #closeConfirmDialog() {
+        this.dom.confirmOverlay.classList.add('hidden');
+        this.#pendingConfirmAction = null;
+      }
+
+      showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        const bgClass = type === 'success'
+          ? 'bg-royal-900 text-white border-royal-700'
+          : 'bg-white text-royal-900 border-lavender-300';
+
+        toast.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-lg text-xs font-semibold flex items-center justify-between gap-3 animate-card ${bgClass}`;
+        toast.innerHTML = `<span>${this.#escapeHTML(message)}</span>`;
+
+        this.dom.toastContainer.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(6px)';
+          toast.style.transition = 'all 0.25s ease';
+          setTimeout(() => toast.remove(), 260);
+        }, 2800);
+      }
+
+      #escapeHTML(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+    }
+
+    // =========================================================================
+    // APPLICATION BOOTSTRAP (Single Page Application Entry Point)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const storageService = new StorageService();
+      const taskManager = new TaskManager(storageService);
+      window.studyNestApp = new StudyNestUI(taskManager);
+    });
+  </script>
+</body>
+</html>
+```
